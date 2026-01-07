@@ -1,38 +1,234 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Website</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            line-height: 1.6;
-        }
-        h1 {
-            color: #333;
-            border-bottom: 2px solid #ccc;
-            padding-bottom: 10px;
-        }
-        .section {
-            margin: 20px 0;
-        }
-    </style>
-</head>
-<body>
-    <h1>Welcome to My Website</h1>
-    
-    <div class="section">
-        <h2>About</h2>
-        <p>こちらにサイトの説明を記載してください。</p>
-    </div>
+<html>
+    <head>
+	    <meta charset='UTF-8'>
+	    <title>ページタイトル</title>
+	    <style>
+		    /* CSSを書くところ */
+		    h3 {
+			color: blue;
+		    }
 
-    <div class="section">
-        <h2>Contact</h2>
-        <p>連絡先情報があれば記載してください。</p>
-    </div>
-</body>
+            .l-container {
+                max-width: 400px;
+                margin: 10% auto;
+            }
+
+		    select {
+  			    width: 150px;
+  			    padding: 2px;
+  			    border: 1px solid #b6b5b5;
+  			    color: #757373;
+		    }
+
+            #resultDiv {
+                margin-top: 50px;
+            }
+
+            #decideButton {
+                width: 10em;
+                height: 3em;
+            }
+
+            #result {
+                margin-top: 20px;
+                color:brown;
+                font-size: 30px;
+            }
+	    </style>
+    </head>
+
+    <body>
+        <h1>サンダルフォンでリーサルを取れる確率を計算します</h1>
+        <div id='follower'>
+            <h3>1. フォロワーの体力を入力してください</h3>
+            <button id='addButton'>フォロワーを追加する</button>
+            <ul id='myList'>
+            </ul>
+        </div>
+
+        <div id='leader'>
+            <h3>2. リーダーの体力を入力してください</h3>
+        </div>
+
+        <div id='resultDiv'>
+            <button id='decideButton'>決定</button>
+            <p id='result'></p>
+        </div>
+
+        <script>
+            // ボタン
+            const addButton = document.getElementById('addButton');
+            const decideButton = document.getElementById('decideButton');
+            // リスト（親）
+            const list = document.getElementById('myList');
+            
+            window.onload = function() {
+                const div = document.getElementById('leader');
+                let select = document.createElement('select');
+
+                select.id = 'leaderSelect'
+                let opt1 = document.createElement('option');
+                opt1.text = '選択してください';
+                opt1.value = '';
+                opt1.setAttribute('disabled', true)
+                opt1.setAttribute('selected', true)
+                select.appendChild(opt1);
+                for ( var i = 1; i<11; i++ ) {
+                    let opt = document.createElement('option');
+                    opt.text =  String(i);
+                    opt.value = String(i);
+                    select.appendChild(opt);
+                }
+                let opt2 = document.createElement('option');
+                opt2.text = '11以上';
+                opt2.value = '11';
+                select.appendChild(opt2);
+                div.appendChild(select);
+            }
+
+            addButton.addEventListener('click', () => {
+                // 追加したい要素
+                let followerID = list.children.length + 1;
+                let div = document.createElement('div');
+                let label = document.createElement('label')
+                let select = document.createElement('select');
+                let btn = document.createElement('button');
+
+                if (followerID > 5) {
+                    return
+                }
+
+                // div
+                div.id = 'div';
+                list.appendChild(div);
+
+                // label
+                let text = `フォロワーの体力`;
+                let add_text = document.createTextNode(text);
+                label.htmlFor = select.id;
+                label.appendChild(select);
+                label.appendChild(add_text);
+                div.appendChild(label);
+
+                // セレクトボックス
+                select.id = 'followerSelect';
+                let opt1 = document.createElement('option');
+                opt1.text = '選択してください';
+                opt1.value = '';
+                opt1.setAttribute('disabled', true)
+                opt1.setAttribute('selected', true)
+                select.appendChild(opt1);
+                for ( var i = 1; i<11; i++ ) {
+                    let opt = document.createElement('option');
+                    opt.text = String(i);
+                    opt.value = String(i);
+                    select.appendChild(opt);
+                }
+                let opt = document.createElement('option');
+                opt.text = '11以上';
+                opt.value = '11';
+                select.appendChild(opt);
+                div.appendChild(select);
+
+                // 削除ボタン
+                btn.innerHTML = '削除';
+                btn.id = 'removeButton';
+                btn.onclick = () => {
+                    div.remove();
+                };
+                div.appendChild(btn);
+            });
+
+            decideButton.addEventListener('click', () => {
+                let el = document.getElementById('result');
+                let resultDiv = document.getElementById('resultDiv');
+                let followerDivs = list.children;
+                let followerDefenses = [];
+                let leaderDefense = document.getElementById('leaderSelect').value;
+
+                // フォロワーの体力を取得する，入力されていなければ関数を終える
+                for ( var i = 0; i<followerDivs.length; i++ ) {
+                    let followerDefense = followerDivs[i].children[1].value
+                    if (followerDefense == '') {
+                        return
+                    }
+                    followerDefenses.push(followerDefense)
+                }
+                // リーダーの体力が入力されていなければ関数を終える
+                if (leaderDefense == '') {
+                    return
+                }
+
+                // リーダーを倒すことに成功した当て方をsuccessfulTargetIdArraysに格納する
+                let n = followerDefenses.length + 1;
+                let array = repetitionCombination(n, 5);
+                let successfulTargetIdArrays = [];
+                for ( var i =0; i<array.length; i++) {
+                    let targetIdArray = array[i];
+                    let curDefenses = [leaderDefense].concat(followerDefenses);
+                    for ( var j = 0; j<5; j++) {
+                        targetID = targetIdArray[j] - 1;
+                        if (targetID == 0) {
+                            curDefenses[0] -= 2;
+                            if (curDefenses[0] <= 0) {
+                                successfulTargetIdArrays.push(targetIdArray.slice(0, j+1));
+                                break
+                            }
+                        } else {
+                            if (curDefenses[targetID] <= 0) {
+                                break;
+                            }
+                            curDefenses[targetID] -= 2;
+                        }
+                    }
+                }
+                // 重複を除く
+                successfulTargetIdArrays = Array.from(
+                    new Set(successfulTargetIdArrays.map(JSON.stringify)),
+                    JSON.parse
+                );
+
+                // 確率を計算する
+                let result = 0;
+                for ( var i = 0; i<successfulTargetIdArrays.length; i++) {
+                    let prob = 1;
+                    let survivorNum = n;
+                    let targetIdArray = successfulTargetIdArrays[i];
+                    let curDefenses = [leaderDefense].concat(followerDefenses);
+
+                    for ( var j = 0; j< targetIdArray.length; j++) {
+                        let targetID = targetIdArray[j] - 1;
+                        prob *= 1 / survivorNum;
+                        curDefenses[targetID] -= 2;
+                        if (curDefenses[targetID] <= 0) {
+                            survivorNum -= 1;
+                        }
+                    }
+
+                    result+= prob;
+                }
+
+                // 確率を表示する
+                el.textContent = result;
+            });
+
+            function repetitionCombination(n, r) {
+                let ans = [];
+
+                if (r == 0) {
+                    ans.push([]);
+                } else {
+                    let array1 = repetitionCombination(n, r-1);
+                    for ( var i = 0 ; i<array1.length; i++) {
+                        for (var j = 0; j<n; j++) {
+                            let array2 = array1[i].concat([j+1]);
+                            ans.push(array2)
+                        }
+                    }
+                }
+
+                return ans;
+            }
+        </script>
+    </body>
 </html>
